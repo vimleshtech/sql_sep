@@ -1,0 +1,105 @@
+
+
+INSERT INTO USERS
+VALUES(2,'JATIN','XYZ')
+
+UPDATE USERS
+SET u_pwd ='ABCD'
+WHERE U_ID =1;
+
+
+SELECT * FROM USERS;
+SELECT * FROM USERS_LOGS;
+WHERE U_ID =1;
+
+CREATE TABLE USERS
+(
+u_id int,
+u_name varchar(40),
+u_pwd varchar(20)
+);
+
+
+CREATE TABLE USERS_logs 
+(
+u_id int,
+u_name varchar(40),
+u_pwd varchar(20),
+time_stamp datetime,
+action_type char(1)
+);
+
+
+CREATE TRIGGER trg_in_users
+on USERS
+AFTER INSERT 
+AS
+BEGIN
+
+		INSERT INTO USERS_logs (U_ID,U_NAME,u_pwd,time_stamp,action_type)
+		SELECT *,GETDATE(),'I' FROM INSERTED 
+END
+	
+
+
+CREATE TRIGGER trg_up_users
+on USERS
+AFTER UPDATE 
+AS
+BEGIN
+		create table a from
+		SELECT a.u_pwd, b.u_pwd FROM USERS as a, inserted as b on a.u_pwd = b.u_pwd
+	if (select count(*) from a) > 1 then
+		drop table a
+	else
+
+		INSERT INTO USERS_logs (U_ID,U_NAME,u_pwd,time_stamp,action_type)
+		SELECT *,GETDATE(),'U' FROM INSERTED 
+
+		INSERT INTO USERS_logs (U_ID,U_NAME,u_pwd,time_stamp,action_type)
+		SELECT *,GETDATE(),'D' FROM DELETED
+	end if
+END
+	
+
+
+	
+	select * from users 
+
+execute P_UPDATE 'RAMAN','ABCD1'
+
+
+create PROCEDURE P_UPDATE 
+(
+@u_name varchar(40),
+@u_pwd varchar(40)
+)
+AS
+BEGIN
+
+	IF EXISTS (
+			SELECT * FROM 
+							(
+							SELECT TOP 3 * FROM USERS_logs 
+							WHERE U_NAME =@u_name ORDER BY TIME_STAMP  DESC
+							) A
+			WHERE U_PWD = @u_pwd
+		)
+	BEGIN
+
+			SELECT 'PWD CANNOT BE UPDATED'  MSG
+	END
+	ELSE
+	BEGIN
+				
+			UPDATE USERS
+			SET u_pwd =@u_pwd
+			WHERE U_name =@u_name;
+
+	END
+
+
+END
+
+
+
