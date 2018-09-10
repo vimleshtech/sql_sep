@@ -1,0 +1,6 @@
+
+select a.beneficiary_name,a.beneficiary_fname,
+  b.pumpid,a.controler_rms_id
+from [benificery table] a inner join [pump table] b
+	on a.contact_no = b.contact
+
